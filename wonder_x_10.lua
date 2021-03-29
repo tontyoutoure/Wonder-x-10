@@ -8,8 +8,8 @@
 
 local GiveCount=18
 
--- How many promotion units are given after TCW are built
-local PromotionCount = 7
+-- How many extra promotion units are given after TCW are built
+local EXTRA_PROMOTION_COUNT = 9
 
 local PromotionRange = 12
 
@@ -25,7 +25,7 @@ local UnitPromotionClassList = {}
 local PromotionClassList = {}
 local GreatProphetUnitIndex
 local GreatPersonClassList = {}
-
+local UnitExtraUpgrades = {}
 
 -- Initializing
 
@@ -108,6 +108,7 @@ Events.UnitGreatPersonCreated.Add(GreatLibraryExtraTechBoost)
 
 function TerracottaComplete(WonderX, WonderY, BuildingIndex, PlayerIndex)
 	if BuildingList[BuildingIndex] == 'BUILDING_TERRACOTTA_ARMY' then
+		UnitExtraUpgrades[PlayerIndex] = {}
 		local PlayerUnitInfo = Players[PlayerIndex]:GetUnits()
 		local UnitCount = PlayerUnitInfo:GetCount()
 		local UnitNum = 0
@@ -116,12 +117,8 @@ function TerracottaComplete(WonderX, WonderY, BuildingIndex, PlayerIndex)
 			if UnitInfo then
 				local UnitPromotionClass = UnitPromotionClassList[UnitInfo:GetType()]
 				if UnitPromotionClass and UnitPromotionClass <= PromotionRange then
-					UnitInfo:SetDamage(0)
-					for i = 1, #PromotionClassList[UnitPromotionClass] do
-						UnitInfo:GetExperience():SetPromotion(PromotionClassList[UnitPromotionClass][i])
-					end
+					UnitExtraUpgrades[PlayerIndex][UnitInfo:GetID()] = EXTRA_PROMOTION_COUNT;
 				end				
-			elseif UnitNum == 0 then 				
 			else
 				break
 			end
@@ -130,6 +127,21 @@ function TerracottaComplete(WonderX, WonderY, BuildingIndex, PlayerIndex)
 	end
 end
 
+function TerracottaOnUnitUpgrade(iPlayer, iUnit)
+	local UnitInfo = UnitManager.GetUnit(iPlayer, iUnit)
+	local ExpInfo = UnitInfo:GetExperience()
+	if UnitExtraUpgrades[iPlayer] and UnitExtraUpgrades[iPlayer][iUnit] and UnitExtraUpgrades[iPlayer][iUnit] > 0 then
+		UnitExtraUpgrades[iPlayer][iUnit] = UnitExtraUpgrades[iPlayer][iUnit]-1;
+		ExpInfo:ChangeExperience(ExpInfo:GetExperienceForNextLevel()-ExpInfo:GetExperiencePoints())
+		UnitManager.RestoreMovement(UnitInfo)
+	end
+
+end
+Events.UnitPromoted.Add(TerracottaOnUnitUpgrade)
+
 Events.WonderCompleted.Add(TerracottaComplete)
+
+
+
 
 print("wonder x 10 loading complete")	
