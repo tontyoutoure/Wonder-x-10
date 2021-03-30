@@ -108,7 +108,7 @@ Events.UnitGreatPersonCreated.Add(GreatLibraryExtraTechBoost)
 
 function TerracottaComplete(WonderX, WonderY, BuildingIndex, PlayerIndex)
 	if BuildingList[BuildingIndex] == 'BUILDING_TERRACOTTA_ARMY' then
-		UnitExtraUpgrades[PlayerIndex] = {}
+		UnitExtraUpgrades[PlayerIndex] = UnitExtraUpgrades[PlayerIndex] or {}
 		local PlayerUnitInfo = Players[PlayerIndex]:GetUnits()
 		local UnitCount = PlayerUnitInfo:GetCount()
 		local UnitNum = 0
@@ -127,7 +127,7 @@ function TerracottaComplete(WonderX, WonderY, BuildingIndex, PlayerIndex)
 	end
 end
 
-function TerracottaOnUnitUpgrade(iPlayer, iUnit)
+function TerracottaOnUnitPromoted(iPlayer, iUnit)
 	local UnitInfo = UnitManager.GetUnit(iPlayer, iUnit)
 	local ExpInfo = UnitInfo:GetExperience()
 	if UnitExtraUpgrades[iPlayer] and UnitExtraUpgrades[iPlayer][iUnit] and UnitExtraUpgrades[iPlayer][iUnit] > 0 then
@@ -137,7 +137,7 @@ function TerracottaOnUnitUpgrade(iPlayer, iUnit)
 	end
 
 end
-Events.UnitPromoted.Add(TerracottaOnUnitUpgrade)
+Events.UnitPromoted.Add(TerracottaOnUnitPromoted)
 
 Events.WonderCompleted.Add(TerracottaComplete)
 
